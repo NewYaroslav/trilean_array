@@ -65,14 +65,14 @@ namespace base3 {
         /** \brief Get a pointer to a data array
          * \return array pointer
          */
-        inline unsigned char *data() {
+        inline unsigned char *data() const {
             return datah;
         }
 
         /** \brief Get array size
          * \return array size
          */
-        inline int size() {
+        inline int size() const {
             return ARRAY_SIZE/8;
         }
 
@@ -167,14 +167,14 @@ namespace base3 {
         /** \brief Get a pointer to a data array
          * \return array pointer
          */
-        inline unsigned char *data() {
+        inline unsigned char *data() const {
             return datah;
         }
 
         /** \brief Get array size
          * \return array size
          */
-        inline int size() {
+        inline int size() const {
             return data_size;
         }
 
@@ -286,28 +286,28 @@ namespace base3 {
         /** \brief Get column size
          * \return column size
          */
-        inline int column_size() {
+        inline int column_size() const {
             return size_y;
         }
 
         /** \brief Get row size
          * \return row size
          */
-        inline int row_size() {
+        inline int row_size() const {
             return size_x;
         }
 
         /** \brief Get size
          * \return size
          */
-        inline int size() {
-            return size_x*size_y;
+        inline int size() const {
+            return trit_data_size;
         }
 
         /** \brief Get a pointer to a data array
          * \return array pointer
          */
-        inline unsigned char *data() {
+        inline unsigned char *data() const {
             return trit_data;
         }
 
