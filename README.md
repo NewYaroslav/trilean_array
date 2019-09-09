@@ -1,2 +1,2 @@
-# trilean_array
-C++ header-only trilean array
+# trilean_array_cpp
+C++ header-only library of a trilean array
