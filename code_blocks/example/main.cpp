@@ -1,7 +1,5 @@
 #include <iostream>
 #include "trit_array.hpp"
-#include <chrono>
-#include <thread>
 
 using namespace std;
 
