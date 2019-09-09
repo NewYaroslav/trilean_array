@@ -230,9 +230,18 @@ namespace base3 {
          * \param size_y column size
          * \param user_data pointer to an array with data
          */
-        trit_array_2d(const int &size_x, const int &size_y, const unsigned char *user_data) {
+        void init(const int &size_x, const int &size_y, const unsigned char *user_data) {
             init(size_x, size_y);
             std::copy(user_data, user_data + trit_data_size, trit_data);
+        }
+
+        /** \brief Initialize a two-dimensional array
+         * \param size_x row size
+         * \param size_y column size
+         * \param user_data pointer to an array with data
+         */
+        trit_array_2d(const int &size_x, const int &size_y, const unsigned char *user_data) {
+            init(size_x, size_y, user_data);
         }
 
         ~trit_array_2d() {
