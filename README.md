@@ -46,3 +46,7 @@ int main() {
 }
 ```
 
+### Note
+
+If a memory free error occurs while working with an array, use the *#define TRIT_ARRAY_2D_USE_VECTOR* macro. This macro replaces a *unsigned char* array with a *vector<unsigned char>*. A memory free error occurred during testing in a multi-threaded environment (*std::async*).
+
