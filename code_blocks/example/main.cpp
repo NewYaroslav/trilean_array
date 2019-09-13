@@ -6,13 +6,13 @@ using namespace std;
 int main() {
     std::cout << "Hello trit!" << std::endl;
 
-    base3::trit_array_2d array_2d;
+    base3::trit_array_2d_static<100000> array_2d;
 
     const int SIZE_X = 1000;
     const int SIZE_Y = 100;
 
     std::cout << "init two-dimensional array" << std::endl << std::flush;
-    array_2d = base3::trit_array_2d(SIZE_X,SIZE_Y);
+    array_2d = base3::trit_array_2d_static<100000>(SIZE_X,SIZE_Y);
 
     std::cout << "set trit" << std::endl << std::flush;
     array_2d.set(0,0,base3::BASE3_TRUE);
@@ -37,7 +37,7 @@ int main() {
     std::cout << "data size: " << data_size << std::endl << std::flush;
 
     unsigned char *array_data = new unsigned char[data_size];
-    unsigned char *point_2d_data = array_2d.data();
+    const unsigned char *point_2d_data = array_2d.data();
     std::copy(point_2d_data, point_2d_data + data_size, array_data);
 
     std::cout << "check get trit" << std::endl << std::flush;
