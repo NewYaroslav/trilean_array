@@ -27,7 +27,6 @@
 				<Compiler>
 					<Add option="-O2" />
 					<Add option="-std=c++11" />
-					<Add option="-DTRIT_ARRAY_2D_USE_VECTOR" />
 					<Add directory="../.." />
 				</Compiler>
 				<Linker>

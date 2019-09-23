@@ -1,11 +1,7 @@
 #ifndef TRIT_ARRAY_HPP_INCLUDED
 #define TRIT_ARRAY_HPP_INCLUDED
 
-//#define TRIT_ARRAY_2D_USE_VECTOR
-
-#ifdef TRIT_ARRAY_2D_USE_VECTOR
-#include <vector>
-#endif
+#include <memory>
 
 namespace base3 {
 
@@ -93,9 +89,10 @@ namespace base3 {
      */
     class trit_array {
         private:
+        std::unique_ptr<unsigned char[]> trit_data;
         unsigned char *datah;
         unsigned char *datal;
-        int data_size;
+        size_t data_size;
         public:
 
         trit_array() {
@@ -104,15 +101,15 @@ namespace base3 {
             data_size = 0;
         };
 
-        trit_array(const int size) {
+        trit_array(const size_t &size) {
             data_size = size/4;
-            datah = new unsigned char[data_size];
+            trit_data = std::unique_ptr<unsigned char[]>(new unsigned char[data_size]);
+            datah = trit_data.get();
             std::fill(datah, datah + data_size, '\0');
             datal = datah + data_size/2;
         };
 
         ~trit_array() {
-            if(datah != NULL) delete [] datah;
             datah = NULL;
             datal = NULL;
         }
@@ -120,16 +117,21 @@ namespace base3 {
         /** \brief Resize Array
          * \param size new array size
          */
-        inline void resize(const int size) {
-            int new_size = size/4;
-            unsigned char *new_arr = new unsigned char[new_size];
-            int copy_size = new_size > data_size ? data_size : new_size;
-            for(int i = 0; i < copy_size; ++i) {
-                new_arr[i] = datah[i];
+        inline void resize(const size_t &size) {
+            size_t new_size = size/4;
+            size_t copy_size = new_size > data_size ? data_size : new_size;
+            std::unique_ptr<unsigned char[]> old_trit_data(new unsigned char[copy_size]);
+            unsigned char *point_old_arr = old_trit_data.get();
+            for(size_t i = 0; i < copy_size; ++i) {
+                point_old_arr[i] = datah[i];
+            }
+            trit_data = std::unique_ptr<unsigned char[]>(new unsigned char[new_size]);
+            datah = trit_data.get();
+            std::fill(datah, datah + new_size, '\0');
+            for(size_t i = 0; i < copy_size; ++i) {
+                datah[i] = point_old_arr[i];
             }
             data_size = new_size;
-            if(datah != NULL) delete [] datah;
-            datah = new_arr;
             datal = datah + data_size/2;
         }
 
@@ -137,9 +139,9 @@ namespace base3 {
          * \param ind array element number
          * \param state array element state
          */
-        inline void set(const int &ind, const int &state) {
-            int byte = ind / 8;
-            int offset = ind % 8;
+        inline void set(const uint32_t &ind, const int &state) {
+            uint32_t byte = ind / 8;
+            uint32_t offset = ind % 8;
             if(state == BASE3_NULL) {
                 unsigned char mask = ~(0x80 >> offset);
                 datah[byte] &= mask;
@@ -162,9 +164,9 @@ namespace base3 {
          * \param ind array element number
          * \return array element state
          */
-        inline int get(const int &ind) {
-            int byte = ind / 8;
-            int offset = ind % 8;
+        inline int get(const uint32_t &ind) {
+            uint32_t byte = ind / 8;
+            uint32_t offset = ind % 8;
             unsigned char bit = 0x80 >> offset;
             return (datah[byte] & bit) ? BASE3_TRUE : (datal[byte] & bit) ? BASE3_FALSE : BASE3_NULL;
         }
@@ -185,9 +187,9 @@ namespace base3 {
 
         trit_array & operator=(const trit_array & array) {
             if(this != &array) {
-                delete [] datah;
                 data_size = array.data_size;
-                datah = new unsigned char[data_size];
+                trit_data = std::unique_ptr<unsigned char[]>(new unsigned char[data_size]);
+                datah = trit_data.get();
                 std::fill(datah, datah + data_size, '\0');
                 std::copy(array.datah,  array.datah + data_size, datah);
                 datal = datah + data_size/2;
@@ -200,48 +202,39 @@ namespace base3 {
      */
     class trit_array_2d {
         private:
-#ifndef TRIT_ARRAY_2D_USE_VECTOR
-        unsigned char *trit_data;
-#else
-        std::vector<unsigned char> trit_data;
-#endif
-        int size_x;
-        int size_y;
-        int size_x_div2;
-        int trit_data_size;
+        std::unique_ptr<unsigned char[]> trit_data;
+        size_t size_x;
+        size_t size_y;
+        size_t size_x_div2;
+        size_t trit_data_size;
 
         public:
 
-        inline void init(const int &size_x, const int &size_y) {
-            trit_array_2d::size_x = size_x / 4;
-            size_x_div2 = size_x / 8;
-            trit_array_2d::size_y = size_y;
-            trit_data_size = trit_array_2d::size_x * trit_array_2d::size_y;
-#ifndef     TRIT_ARRAY_2D_USE_VECTOR
-            trit_data = new unsigned char[trit_data_size];
-            std::fill(trit_data, trit_data + trit_data_size, '\0');
-#else
-            trit_data.resize(trit_data_size);
-            std::fill(trit_data.begin(), trit_data.end(), '\0');
-#endif
+        /** \brief Initialize a two-dimensional array
+         * \param user_size_x row size
+         * \param user_size_y column size
+         */
+        inline void init(const size_t &user_size_x, const size_t &user_size_y) {
+            size_y = user_size_y;
+            size_x = user_size_x / 4;
+            size_x_div2 = user_size_x / 8;
+            trit_data_size = size_x * size_y;
+            trit_data = std::unique_ptr<unsigned char[]>(new unsigned char[trit_data_size]);
+            unsigned char *point_trit_data = trit_data.get();
+            std::fill(point_trit_data, point_trit_data + trit_data_size, '\0');
         }
 
-        trit_array_2d() {
-#ifndef     TRIT_ARRAY_2D_USE_VECTOR
-            trit_data = NULL;
-#endif
-            size_x = 0;
-            size_y = 0;
-            size_x_div2 = 0;
-            trit_data_size = 0;
+        trit_array_2d() :
+                size_x(0), size_y(0), size_x_div2(0), trit_data_size(0) {
         }
 
         /** \brief Initialize a two-dimensional array
-         * \param size_x row size
-         * \param size_y column size
+         * \param user_size_x row size
+         * \param user_size_y column size
          */
-        trit_array_2d(const int &size_x, const int &size_y) {
-            init(size_x, size_y);
+        trit_array_2d(const size_t &user_size_x, const size_t &user_size_y) :
+                size_x(0), size_y(0), size_x_div2(0), trit_data_size(0) {
+            init(user_size_x, user_size_y);
         }
 
         /** \brief Initialize a two-dimensional array
@@ -249,9 +242,10 @@ namespace base3 {
          * \param size_y column size
          * \param user_data pointer to an array with data
          */
-        void init(const int &size_x, const int &size_y, const unsigned char *user_data) {
-            init(size_x, size_y);
-            std::copy(user_data, user_data + trit_data_size, trit_data.begin());
+        void init(const size_t &user_size_x, const size_t &user_size_y, const unsigned char *user_data) {
+            init(user_size_x, user_size_y);
+            unsigned char *point_trit_data = trit_data.get();
+            std::copy(user_data, user_data + trit_data_size, point_trit_data);
         }
 
         /** \brief Initialize a two-dimensional array
@@ -259,129 +253,76 @@ namespace base3 {
          * \param size_y column size
          * \param user_data pointer to an array with data
          */
-        trit_array_2d(const int &size_x, const int &size_y, const unsigned char *user_data) {
-            init(size_x, size_y, user_data);
+        trit_array_2d(const size_t &user_size_x, const size_t &user_size_y, const unsigned char *user_data) :
+                size_x(0), size_y(0), size_x_div2(0), trit_data_size(0) {
+            init(user_size_x, user_size_y, user_data);
         }
 
-        ~trit_array_2d() {
-#ifndef     TRIT_ARRAY_2D_USE_VECTOR
-            if(trit_data != NULL) delete [] trit_data;
-#endif
-        }
-
-#ifndef TRIT_ARRAY_2D_USE_VECTOR
+        ~trit_array_2d() {}
 
         /** \brief Set the value of the trit
          * \param x position of an element in a row of a two-dimensional array
          * \param y position of an element in a column of a two-dimensional array
          * \param state array element state
          */
-        inline void set(const int &x, const int &y, const int &state) {
-            int offset_y = y*size_x;
-            unsigned char *datah = trit_data + offset_y;
-            unsigned char *datal = trit_data + offset_y + size_x_div2;
-            int byte = x / 8;
-            int offset = x % 8;
-            if(state == BASE3_NULL) {
-                unsigned char mask = ~(0x80 >> offset);
-                datah[byte] &= mask;
-                datal[byte] &= mask;
-            } else
-            if(state >= BASE3_TRUE) {
-                unsigned char bit = 0x80 >> offset;
-                unsigned char mask = ~bit;
-                datah[byte] |= bit;
-                datal[byte] &= mask;
-            } else {
-                unsigned char bit = 0x80 >> offset;
-                unsigned char mask = ~bit;
-                datah[byte] &= mask;
-                datal[byte] |= bit;
-            }
-        }
-#else
-
-        /** \brief Set the value of the trit
-         * \param x position of an element in a row of a two-dimensional array
-         * \param y position of an element in a column of a two-dimensional array
-         * \param state array element state
-         */
-        inline void set(const int &x, const int &y, const int &state) {
-            int offset_y = y * size_x;
-            int byte = x / 8;
-            int offset = x % 8;
+        inline void set(const size_t &x, const size_t &y, const int &state) {
+            size_t offset_y = y * size_x;
+            size_t byte = x / 8;
+            size_t offset = x % 8;
             size_t offset_h = offset_y + byte;
             size_t offset_l = offset_h + size_x_div2;
+            unsigned char *point_trit_data = trit_data.get();
             if(state == BASE3_NULL) {
                 unsigned char mask = ~(0x80 >> offset);
-                trit_data[offset_h] &= mask;
-                trit_data[offset_l] &= mask;
+                point_trit_data[offset_h] &= mask;
+                point_trit_data[offset_l] &= mask;
             } else
             if(state >= BASE3_TRUE) {
                 unsigned char bit = 0x80 >> offset;
                 unsigned char mask = ~bit;
-                trit_data[offset_h] |= bit;
-                trit_data[offset_l] &= mask;
+                point_trit_data[offset_h] |= bit;
+                point_trit_data[offset_l] &= mask;
             } else {
                 unsigned char bit = 0x80 >> offset;
                 unsigned char mask = ~bit;
-                trit_data[offset_h] &= mask;
-                trit_data[offset_l] |= bit;
+                point_trit_data[offset_h] &= mask;
+                point_trit_data[offset_l] |= bit;
             }
         }
-#endif
-
-#ifndef TRIT_ARRAY_2D_USE_VECTOR
 
         /** \brief Get the value of the trit
          * \param x position of an element in a row of a two-dimensional array
          * \param y position of an element in a column of a two-dimensional array
          * \return array element state
          */
-        inline int get(const int &x, const int &y) {
-            int offset_y = y * size_x;
-            unsigned char *datah = trit_data + offset_y;
-            unsigned char *datal = trit_data + offset_y + size_x_div2;
-            int byte = x / 8;
-            int offset = x % 8;
-            unsigned char bit = 0x80 >> offset;
-            return (datah[byte] & bit) ? BASE3_TRUE : (datal[byte] & bit) ? BASE3_FALSE : BASE3_NULL;
-        }
-#else
-
-        /** \brief Get the value of the trit
-         * \param x position of an element in a row of a two-dimensional array
-         * \param y position of an element in a column of a two-dimensional array
-         * \return array element state
-         */
-        inline int get(const int &x, const int &y) {
-            int offset_y = y * size_x;
-            int byte = x / 8;
-            int offset = x % 8;
-            unsigned char bit = 0x80 >> offset;
+        inline int get(const size_t &x, const size_t &y) {
+            size_t offset_y = y * size_x;
+            size_t byte = x / 8;
             size_t offset_h = offset_y + byte;
-            return (trit_data[offset_h] & bit) ? BASE3_TRUE : (trit_data[offset_h + size_x_div2] & bit) ? BASE3_FALSE : BASE3_NULL;
+            unsigned char offset = x % 8;
+            unsigned char bit = 0x80 >> offset;
+            unsigned char *point_trit_data = trit_data.get();
+            return (point_trit_data[offset_h] & bit) ? BASE3_TRUE : (point_trit_data[offset_h + size_x_div2] & bit) ? BASE3_FALSE : BASE3_NULL;
         }
-#endif
 
         /** \brief Get column size
          * \return column size
          */
-        inline int column_size() const {
+        inline size_t column_size() const {
             return size_y;
         }
 
         /** \brief Get row size
          * \return row size
          */
-        inline int row_size() const {
+        inline size_t row_size() const {
             return size_x;
         }
 
         /** \brief Get size
          * \return size
          */
-        inline int size() const {
+        inline size_t size() const {
             return trit_data_size;
         }
 
@@ -389,24 +330,19 @@ namespace base3 {
          * \return array pointer
          */
         inline const unsigned char *data() const {
-            return (const unsigned char *)trit_data.data();
+            return (const unsigned char *)trit_data.get();
         }
 
-        trit_array_2d & operator=(const trit_array_2d & array_2d) {
+        trit_array_2d & operator=(const trit_array_2d &array_2d) {
             if(this != &array_2d) {
-#ifndef         TRIT_ARRAY_2D_USE_VECTOR
-                if(trit_data != NULL) delete [] trit_data;
-#endif
                 size_x = array_2d.size_x;
                 size_y = array_2d.size_y;
                 size_x_div2 = array_2d.size_x_div2;
                 trit_data_size = array_2d.trit_data_size;
-#ifndef         TRIT_ARRAY_2D_USE_VECTOR
-                trit_data = new unsigned char[trit_data_size];
-                std::copy(array_2d.trit_data, array_2d.trit_data + trit_data_size, trit_data);
-#else
-                trit_data = array_2d.trit_data;
-#endif
+                trit_data = std::unique_ptr<unsigned char[]>(new unsigned char[trit_data_size]);
+                unsigned char *dst_trit_data = trit_data.get();
+                unsigned char *src_trit_data = array_2d.trit_data.get();
+                std::copy(src_trit_data, src_trit_data + trit_data_size, dst_trit_data);
             }
             return *this;
         }
