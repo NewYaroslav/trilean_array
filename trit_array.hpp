@@ -295,7 +295,7 @@ namespace base3 {
          * \param y position of an element in a column of a two-dimensional array
          * \return array element state
          */
-        inline int get(const size_t &x, const size_t &y) {
+        inline int get(const size_t &x, const size_t &y) const {
             size_t offset_y = y * size_x;
             size_t byte = x / 8;
             size_t offset_h = offset_y + byte;
