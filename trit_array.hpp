@@ -346,6 +346,19 @@ namespace base3 {
             }
             return *this;
         }
+
+        trit_array_2d(const trit_array_2d &array_2d) {
+            if(this != &array_2d) {
+                size_x = array_2d.size_x;
+                size_y = array_2d.size_y;
+                size_x_div2 = array_2d.size_x_div2;
+                trit_data_size = array_2d.trit_data_size;
+                trit_data = std::unique_ptr<unsigned char[]>(new unsigned char[trit_data_size]);
+                unsigned char *dst_trit_data = trit_data.get();
+                unsigned char *src_trit_data = array_2d.trit_data.get();
+                std::copy(src_trit_data, src_trit_data + trit_data_size, dst_trit_data);
+            }
+        }
     };
 
     template <int ARRAY_SIZE>

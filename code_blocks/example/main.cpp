@@ -1,4 +1,6 @@
 #include <iostream>
+#include <vector>
+#include <algorithm>
 #include "trit_array.hpp"
 
 using namespace std;
@@ -65,6 +67,12 @@ int main() {
     }
 
     delete [] array_data;
+
+
+    std::vector<base3::trit_array_2d> vec;
+    std::sort(vec.begin(), vec.end(), [](const base3::trit_array_2d &a, const base3::trit_array_2d &b) {
+        return a.size() < b.size();
+    });
 
     std::cout << "end" << std::endl << std::flush;
     return 0;
