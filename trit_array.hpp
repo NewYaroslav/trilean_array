@@ -56,7 +56,7 @@ namespace base3 {
          * \param ind array element number
          * \return array element state
          */
-        inline int get(const int &ind) {
+        inline int get(const int &ind) const {
             int byte = ind / 8;
             int offset = ind % 8;
             unsigned char bit = 0x80 >> offset;
@@ -164,7 +164,7 @@ namespace base3 {
          * \param ind array element number
          * \return array element state
          */
-        inline int get(const uint32_t &ind) {
+        inline int get(const uint32_t &ind) const {
             uint32_t byte = ind / 8;
             uint32_t offset = ind % 8;
             unsigned char bit = 0x80 >> offset;
@@ -443,7 +443,7 @@ namespace base3 {
          * \param y position of an element in a column of a two-dimensional array
          * \return array element state
          */
-        inline int get(const int &x, const int &y) {
+        inline int get(const int &x, const int &y) const {
             int offset_y = y * size_x;
             unsigned char *datah = trit_data + offset_y;
             unsigned char *datal = trit_data + offset_y + size_x_div2;
