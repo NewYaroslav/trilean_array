@@ -68,7 +68,6 @@ int main() {
 
     delete [] array_data;
 
-
     std::vector<base3::trit_array_2d> vec;
     std::sort(vec.begin(), vec.end(), [](const base3::trit_array_2d &a, const base3::trit_array_2d &b) {
         return a.size() < b.size();
